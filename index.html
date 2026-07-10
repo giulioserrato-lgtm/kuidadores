@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Caderno de Cuidadores</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3C6B1F">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cuidadores">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #E7F3DB;
+    --paper-2: #DBEBC8;
+    --card: #FBFEF7;
+    --ink: #223318;
+    --ink-soft: #5B6E4C;
+    --border: #C9DFAE;
+    --lime: #C8EB8A;
+    --lime-dark: #B3DE68;
+    --lime-ink: #1F3A0F;
+    --green-deep: #2F5D24;
+    --ochre: #C48A3E;
+    --brick: #AE3E30;
+    --sage: #E4F1CC;
+    --sage-ink: #3F5A2E;
+    --star: #E8A93B;
+    --star-off: #D8E3C6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:36px 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:18px;
+    border-bottom:2px solid var(--green-deep);
+    padding-bottom:18px;
+    margin-bottom:22px;
+  }
+  .brand-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--green-deep);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    margin:0;
+    line-height:1.05;
+    color:var(--green-deep);
+  }
+  .subtitle{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    max-width:520px;
+  }
+  .btn-new{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.02em;
+    background:var(--lime);
+    color:var(--lime-ink);
+    border:2px solid var(--green-deep);
+    border-radius:3px;
+    padding:12px 20px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn-new:hover{background:var(--lime-dark);}
+  .btn-new:active{transform:scale(.97);}
+  .btn-new:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid var(--green-deep); outline-offset:2px;
+  }
+
+  /* ---------- Storage banner ---------- */
+  .storage-banner{
+    display:none;
+    background:#F2E0C6; color:#7A4F16;
+    border:1px solid var(--ochre);
+    border-radius:6px;
+    padding:12px 16px;
+    font-size:13px;
+    margin-bottom:18px;
+  }
+  .storage-banner.show{display:block;}
+
+  /* ---------- Stat strip ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    margin-bottom:26px;
+  }
+  .stat{
+    background:var(--paper-2);
+    padding:14px 18px;
+  }
+  .stat .label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--ink-soft);
+  }
+  .stat .value{
+    font-family:'Fraunces',serif;
+    font-size:26px;
+    font-weight:600;
+    margin-top:4px;
+    color:var(--green-deep);
+  }
+  .stat.alert .value{color:var(--brick);}
+
+  /* ---------- Filter bar ---------- */
+  .filterbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .chips{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:7px 13px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .chip.active{
+    background:var(--green-deep);
+    color:#fff;
+    border-color:var(--green-deep);
+  }
+  .sortsel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    padding:8px 10px;
+    border-radius:3px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--ink);
+  }
+
+  /* ---------- Stars ---------- */
+  .stars{
+    display:inline-flex;
+    gap:3px;
+  }
+  .stars .star{
+    font-size:20px;
+    color:var(--star-off);
+    line-height:1;
+  }
+  .stars .star.filled{color:var(--star);}
+  .stars.interactive .star{
+    cursor:pointer;
+    transition:transform .1s ease;
+  }
+  .stars.interactive .star:hover{transform:scale(1.2);}
+  .stars.small .star{font-size:15px;}
+
+  /* ---------- Grid & Cards ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:18px;
+  }
+  .card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:20px 18px 16px;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease;
+  }
+  .card:hover{
+    box-shadow:0 6px 18px rgba(47,93,36,.12);
+    transform:translateY(-2px);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .cname{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:20px;
+    margin:0;
+  }
+  .cmeta{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:14px 0 12px;
+  }
+  .tag{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    background:var(--sage);
+    color:var(--sage-ink);
+    font-weight:600;
+  }
+  .tag.warn{background:#F2E0C6; color:#7A4F16;}
+  .tag.bad{background:#F2D8D2; color:var(--brick);}
+  .card-foot{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12px;
+    color:var(--ink-soft);
+    border-top:1px dashed var(--border);
+    padding-top:10px;
+    margin-top:4px;
+  }
+  .valor{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .empty{
+    text-align:center;
+    padding:70px 20px;
+    color:var(--ink-soft);
+    font-family:'Fraunces',serif;
+    font-size:18px;
+  }
+  .empty span{display:block; font-family:'Inter',sans-serif; font-size:13px; margin-top:8px;}
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(34,51,24,.55);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:36px 16px;
+    overflow-y:auto;
+    z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--card);
+    border-radius:8px;
+    max-width:640px;
+    width:100%;
+    padding:28px 28px 30px;
+    position:relative;
+    animation:pop .18s ease;
+  }
+  @keyframes pop{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+  .modal h2{
+    font-family:'Fraunces',serif;
+    margin:0 0 4px;
+    font-size:24px;
+    color:var(--green-deep);
+  }
+  .modal .modal-sub{font-size:12.5px; color:var(--ink-soft); margin-bottom:20px;}
+  .modal-close{
+    position:absolute; top:20px; right:20px;
+    background:none; border:none; cursor:pointer;
+    font-size:20px; color:var(--ink-soft); line-height:1;
+  }
+  fieldset{
+    border:none;
+    padding:0;
+    margin:0 0 18px;
+  }
+  legend{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--green-deep);
+    margin-bottom:10px;
+    padding:0;
+  }
+  .row{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;}
+  .row.single{grid-template-columns:1fr;}
+  .row.three{grid-template-columns:1fr 1fr 1fr;}
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:5px;
+    color:var(--ink);
+  }
+  input[type=text], input[type=number], input[type=tel], select, textarea{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:56px;}
+  .checkgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px 14px;}
+  .checkitem{display:flex; align-items:center; gap:7px; font-size:13px; font-weight:400;}
+  .checkitem input{width:auto;}
+  .switchrow{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .switchrow label{margin:0;}
+  .modal-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:22px;
+    padding-top:16px;
+    border-top:1px solid var(--border);
+  }
+  .btn-danger{
+    background:none; border:1px solid var(--brick); color:var(--brick);
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    padding:9px 14px; border-radius:4px; cursor:pointer;
+  }
+  .btn-save{
+    background:var(--lime); color:var(--lime-ink); border:2px solid var(--green-deep);
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+    padding:11px 22px; border-radius:4px; cursor:pointer;
+  }
+  .btn-save:hover{background:var(--lime-dark);}
+  .btn-save[disabled]{opacity:.7; cursor:default;}
+  .btn-ghost{
+    background:none; border:1px solid var(--border); color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:12px;
+    padding:9px 14px; border-radius:4px; cursor:pointer;
+  }
+  .toast{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    background:var(--green-deep); color:#fff; font-size:13.5px; font-weight:600;
+    padding:12px 22px; border-radius:24px; z-index:200;
+    font-family:'Inter',sans-serif;
+    box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(4px);}
+  .toast.error{background:var(--brick);}
+  .loading-msg{
+    text-align:center; padding:60px 0; color:var(--ink-soft);
+    font-family:'IBM Plex Mono',monospace; font-size:13px;
+  }
+  .shared-note{
+    font-size:11px; color:var(--ink-soft); margin-top:4px;
+  }
+  .linklike{
+    background:none; border:none; padding:0; margin:0;
+    font-size:11px; color:var(--green-deep); text-decoration:underline;
+    cursor:pointer; font-family:'Inter',sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="brand-eyebrow">Registro da casa · cuidados diários</p>
+      <h1>Caderno de Cuidadores</h1>
+      <p class="subtitle">Um lugar para acompanhar quem cuida do pai e da mãe: atendimento, habilidades, documentação e plantões.</p>
+    </div>
+    <div>
+      <button class="btn-new" id="btnNew">+ Novo cuidador</button>
+      <p class="shared-note">Os dados ficam salvos neste aparelho.
+        <button class="linklike" id="btnExport" type="button">Exportar backup</button> ·
+        <button class="linklike" id="btnImport" type="button">Importar backup</button>
+      </p>
+      <input type="file" id="fileImport" accept="application/json" style="display:none;">
+    </div>
+  </header>
+
+  <div class="storage-banner" id="storageBanner">
+    ⚠️ Este navegador está bloqueando o salvamento permanente (pode ser uma aba anônima/privada). Os dados vão funcionar só durante esta sessão — use "Exportar backup" antes de fechar o app para não perder nada.
+  </div>
+
+  <div id="loadingBox" class="loading-msg">Carregando o caderno…</div>
+
+  <div id="content" style="display:none;">
+    <div class="stats" id="statsBar"></div>
+
+    <div class="filterbar">
+      <div class="chips" id="chips"></div>
+      <select class="sortsel" id="sortSel">
+        <option value="nome">Ordenar: nome (A–Z)</option>
+        <option value="nota_desc">Ordenar: melhor avaliação</option>
+        <option value="nota_asc">Ordenar: pior avaliação</option>
+        <option value="valor_desc">Ordenar: valor do plantão (maior)</option>
+        <option value="valor_asc">Ordenar: valor do plantão (menor)</option>
+      </select>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
+    <h2 id="modalTitle">Novo cuidador</h2>
+    <p class="modal-sub">Preencha o que souber — pode completar depois.</p>
+    <form id="form">
+      <input type="hidden" id="fId">
+      <input type="hidden" id="fNota" value="3">
+
+      <fieldset>
+        <legend>Identificação</legend>
+        <div class="row">
+          <div>
+            <label for="fNome">Nome</label>
+            <input type="text" id="fNome" required placeholder="Nome do cuidador">
+          </div>
+          <div>
+            <label for="fTelefone">Telefone</label>
+            <input type="tel" id="fTelefone" placeholder="(00) 00000-0000">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="fMoradia">Mora perto ou longe?</label>
+            <select id="fMoradia">
+              <option value="Perto">Perto</option>
+              <option value="Longe">Longe</option>
+              <option value="">Não informado</option>
+            </select>
+          </div>
+          <div>
+            <label for="fBairro">Bairro / tempo de deslocamento</label>
+            <input type="text" id="fBairro" placeholder="Ex: 20 min de ônibus">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Avaliação geral (toque nas estrelas)</legend>
+        <div class="row single">
+          <div class="stars interactive" id="fNotaStars">
+            <span class="star" data-star="1">★</span>
+            <span class="star" data-star="2">★</span>
+            <span class="star" data-star="3">★</span>
+            <span class="star" data-star="4">★</span>
+            <span class="star" data-star="5">★</span>
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="fChamarNovamente">Chamar novamente?</label>
+            <select id="fChamarNovamente">
+              <option value="Sim">Sim, chamar novamente</option>
+              <option value="Não">Não chamar novamente</option>
+              <option value="Talvez">Talvez, avaliar depois</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Capacidade e postura no cuidado</legend>
+        <div class="row">
+          <div>
+            <label for="fForca">Tem força física para o cuidado?</label>
+            <select id="fForca">
+              <option value="Alta">Alta</option>
+              <option value="Média">Média</option>
+              <option value="Baixa">Baixa</option>
+            </select>
+          </div>
+          <div>
+            <label for="fUsoCelular">Uso do celular durante o plantão</label>
+            <select id="fUsoCelular">
+              <option value="Não usa">Não usa</option>
+              <option value="Usa às vezes">Usa às vezes</option>
+              <option value="Fica o tempo todo">Fica o tempo todo</option>
+            </select>
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="fHabilidades">Habilidades (banho, curativo, mobilização, medicação...)</label>
+            <textarea id="fHabilidades" placeholder="Descreva o que ela sabe fazer bem"></textarea>
+          </div>
+        </div>
+        <div class="row three">
+          <div>
+            <label for="fAutonomia">Autonomia</label>
+            <select id="fAutonomia">
+              <option value="Autônoma">Autônoma</option>
+              <option value="Precisa de orientação">Precisa de orientação</option>
+            </select>
+          </div>
+          <div>
+            <label for="fProativa">Proatividade</label>
+            <select id="fProativa">
+              <option value="Muito proativa">Muito proativa</option>
+              <option value="Regular">Regular</option>
+              <option value="Pouco proativa">Pouco proativa</option>
+            </select>
+          </div>
+          <div>
+            <label for="fArruma">Arruma cama/cômodo do idoso?</label>
+            <select id="fArruma">
+              <option value="Sempre">Sempre</option>
+              <option value="Às vezes">Às vezes</option>
+              <option value="Não">Não</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Relacionamento</legend>
+        <div class="switchrow">
+          <input type="checkbox" id="fTemProblema">
+          <label for="fTemProblema" style="margin:0;">Já teve algum problema de relacionamento</label>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="fProblemaDesc">Se sim, descreva brevemente</label>
+            <textarea id="fProblemaDesc" placeholder="O que aconteceu"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documentação entregue</legend>
+        <div class="checkgrid">
+          <label class="checkitem"><input type="checkbox" id="docRg"> RG / CPF</label>
+          <label class="checkitem"><input type="checkbox" id="docEndereco"> Comprovante de endereço</label>
+          <label class="checkitem"><input type="checkbox" id="docCurso"> Curso / carteira profissional</label>
+          <label class="checkitem"><input type="checkbox" id="docReferencias"> Referências</label>
+          <label class="checkitem"><input type="checkbox" id="docAntecedentes"> Antecedentes criminais</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Plantão, pontualidade e faltas</legend>
+        <div class="row three">
+          <div>
+            <label for="fValor">Valor cobrado (R$)</label>
+            <input type="number" id="fValor" min="0" step="1" placeholder="0">
+          </div>
+          <div>
+            <label for="fUnidade">Referente a</label>
+            <select id="fUnidade">
+              <option value="plantão de 10h">plantão de 10h</option>
+              <option value="plantão de 12h">plantão de 12h</option>
+              <option value="plantão de 24h">plantão de 24h</option>
+              <option value="diária">diária</option>
+              <option value="mensal">mensal</option>
+            </select>
+          </div>
+          <div>
+            <label for="fFaltas">Nº de faltas</label>
+            <input type="number" id="fFaltas" min="0" step="1" placeholder="0">
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="fPontualidade">Pontualidade</label>
+            <select id="fPontualidade">
+              <option value="Pontual">Pontual</option>
+              <option value="Atrasa às vezes">Atrasa às vezes</option>
+              <option value="Sempre atrasa">Sempre atrasa</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Observações gerais</legend>
+        <div class="row single">
+          <div>
+            <textarea id="fObs" placeholder="Qualquer outra observação importante"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" id="btnDelete" style="display:none;">Remover cuidador</button>
+        <div style="display:flex; gap:10px; margin-left:auto;">
+          <button type="button" class="btn-ghost" id="btnCancel">Cancelar</button>
+          <button type="submit" class="btn-save">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'cuidadores-lista';
+let caregivers = [];
+let activeFilter = 'Todos';
+let sortMode = 'nome';
+let editingId = null;
+
+const $ = (id) => document.getElementById(id);
+
+function starsHTML(nota, interactive, id, small){
+  nota = Number(nota) || 0;
+  let cls = 'stars' + (interactive?' interactive':'') + (small?' small':'');
+  let html = `<div class="${cls}" ${id?`data-id="${id}"`:''}>`;
+  for(let i=1;i<=5;i++){
+    html += `<span class="star ${i<=nota?'filled':''}" data-star="${i}">★</span>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function setFormStars(value){
+  $('fNota').value = value;
+  document.querySelectorAll('#fNotaStars .star').forEach(s=>{
+    s.classList.toggle('filled', Number(s.dataset.star) <= value);
+  });
+}
+
+function storageAvailable(){
+  try{
+    const testKey = '__test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+let STORAGE_OK = true;
+
+async function loadData(){
+  STORAGE_OK = storageAvailable();
+  if(!STORAGE_OK){
+    $('storageBanner').classList.add('show');
+  }
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    caregivers = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    caregivers = [];
+  }
+  $('loadingBox').style.display = 'none';
+  $('content').style.display = 'block';
+  render();
+}
+
+async function saveData(){
+  if(!STORAGE_OK){
+    return true;
+  }
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(caregivers));
+    return true;
+  }catch(e){
+    STORAGE_OK = false;
+    $('storageBanner').classList.add('show');
+    showToast('O navegador bloqueou o salvamento. Use "Exportar backup".', true);
+    return true;
+  }
+}
+
+function showToast(msg, isError){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', !!isError);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+function computeStats(){
+  const total = caregivers.length;
+  const comValor = caregivers.filter(c=>c.valor && !isNaN(c.valor));
+  const media = comValor.length ? (comValor.reduce((a,c)=>a+Number(c.valor),0)/comValor.length) : 0;
+  const comNota = caregivers.filter(c=>c.nota);
+  const mediaNota = comNota.length ? (comNota.reduce((a,c)=>a+Number(c.nota),0)/comNota.length) : 0;
+  const alertas = caregivers.filter(c => c.temProblema || Number(c.faltas)>2 || Number(c.nota)<=2 || c.usoCelular==='Fica o tempo todo' || c.chamarNovamente==='Não').length;
+  return {total, media, mediaNota, alertas};
+}
+
+function renderStats(){
+  const {total, media, mediaNota, alertas} = computeStats();
+  $('statsBar').innerHTML = `
+    <div class="stat"><div class="label">Cuidadores cadastrados</div><div class="value">${total}</div></div>
+    <div class="stat"><div class="label">Média de estrelas</div><div class="value">${mediaNota? mediaNota.toFixed(1):'—'} ★</div></div>
+    <div class="stat"><div class="label">Valor médio de plantão</div><div class="value">R$ ${media.toFixed(0)}</div></div>
+    <div class="stat ${alertas>0?'alert':''}"><div class="label">Pontos de atenção</div><div class="value">${alertas}</div></div>
+  `;
+}
+
+function renderChips(){
+  const options = ['Todos','5','4','3','2','1'];
+  $('chips').innerHTML = options.map(o=>
+    `<button class="chip ${activeFilter===o?'active':''}" data-f="${o}">${o==='Todos'?'Todos':o+' ★'}</button>`
+  ).join('');
+  document.querySelectorAll('.chip').forEach(ch=>{
+    ch.onclick = ()=>{ activeFilter = ch.dataset.f; render(); };
+  });
+}
+
+function docCount(c){
+  const keys = ['docRg','docEndereco','docCurso','docReferencias','docAntecedentes'];
+  return keys.filter(k=>c[k]).length;
+}
+
+async function quickRate(id, val){
+  const c = caregivers.find(x=>x.id===id);
+  if(!c) return;
+  c.nota = val;
+  await saveData();
+  render();
+  showToast('Avaliação atualizada.');
+}
+
+function renderGrid(){
+  let list = [...caregivers];
+  if(activeFilter !== 'Todos'){
+    list = list.filter(c => String(c.nota) === activeFilter);
+  }
+  if(sortMode==='nome') list.sort((a,b)=> (a.nome||'').localeCompare(b.nome||''));
+  else if(sortMode==='valor_desc') list.sort((a,b)=> (Number(b.valor)||0)-(Number(a.valor)||0));
+  else if(sortMode==='valor_asc') list.sort((a,b)=> (Number(a.valor)||0)-(Number(b.valor)||0));
+  else if(sortMode==='nota_desc') list.sort((a,b)=> (Number(b.nota)||0)-(Number(a.nota)||0));
+  else if(sortMode==='nota_asc') list.sort((a,b)=> (Number(a.nota)||0)-(Number(b.nota)||0));
+
+  if(list.length===0){
+    $('grid').innerHTML = `<div class="empty" style="grid-column:1/-1;">Nenhum cuidador por aqui ainda.<span>Toque em “+ Novo cuidador” para começar o registro.</span></div>`;
+    return;
+  }
+
+  $('grid').innerHTML = list.map(c=>{
+    const tags = [];
+    tags.push(`<span class="tag">Força: ${c.forca||'—'}</span>`);
+    tags.push(`<span class="tag">${c.autonomia||'—'}</span>`);
+    tags.push(`<span class="tag">${c.proativa||'—'}</span>`);
+    tags.push(`<span class="tag">Arruma quarto: ${c.arruma||'—'}</span>`);
+    const uso = c.usoCelular || 'Não usa';
+    if(uso === 'Fica o tempo todo') tags.push(`<span class="tag bad">Celular: fica o tempo todo</span>`);
+    else if(uso === 'Usa às vezes') tags.push(`<span class="tag warn">Celular: usa às vezes</span>`);
+    else tags.push(`<span class="tag">Celular: não usa</span>`);
+    if(c.temProblema) tags.push(`<span class="tag bad">Relacionamento: atenção</span>`);
+    if(c.pontualidade==='Sempre atrasa') tags.push(`<span class="tag bad">Sempre atrasa</span>`);
+    else if(c.pontualidade==='Atrasa às vezes') tags.push(`<span class="tag warn">Atrasa às vezes</span>`);
+    const chamar = c.chamarNovamente || 'Talvez';
+    if(chamar === 'Não') tags.push(`<span class="tag bad">Não chamar novamente</span>`);
+    else if(chamar === 'Talvez') tags.push(`<span class="tag warn">Chamar novamente: avaliar</span>`);
+    else tags.push(`<span class="tag">Chamar novamente</span>`);
+    const docs = docCount(c);
+    return `
+    <div class="card" data-id="${c.id}">
+      <div class="card-top">
+        <div>
+          <p class="cname">${c.nome||'Sem nome'}</p>
+          <p class="cmeta">${c.telefone||'sem telefone'} · ${c.moradia||'distância não informada'}${c.bairro? ' · '+c.bairro:''}</p>
+        </div>
+        ${starsHTML(c.nota, true, c.id)}
+      </div>
+      <div class="tags">${tags.join('')}</div>
+      <div class="card-foot">
+        <span>Docs: ${docs}/5 · Faltas: ${c.faltas||0}</span>
+        <span class="valor">R$ ${c.valor||'—'} / ${c.unidade||'plantão'}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.stars')) return;
+      openModal(card.dataset.id);
+    });
+  });
+
+  document.querySelectorAll('.grid .stars.interactive').forEach(starsEl=>{
+    starsEl.addEventListener('click', (e)=>{
+      const star = e.target.closest('.star');
+      if(!star) return;
+      e.stopPropagation();
+      quickRate(starsEl.dataset.id, Number(star.dataset.star));
+    });
+  });
+}
+
+function render(){
+  renderStats();
+  renderChips();
+  renderGrid();
+}
+
+function resetForm(){
+  $('form').reset();
+  $('fId').value = '';
+  setFormStars(3);
+  $('fChamarNovamente').value = 'Talvez';
+  editingId = null;
+  $('btnDelete').style.display = 'none';
+  $('modalTitle').textContent = 'Novo cuidador';
+}
+
+function openModal(id){
+  resetForm();
+  if(id){
+    const c = caregivers.find(x=>x.id===id);
+    if(!c) return;
+    editingId = id;
+    $('modalTitle').textContent = c.nome || 'Cuidador';
+    $('fId').value = c.id;
+    $('fNome').value = c.nome||'';
+    $('fTelefone').value = c.telefone||'';
+    $('fMoradia').value = c.moradia||'';
+    $('fBairro').value = c.bairro||'';
+    setFormStars(c.nota||3);
+    $('fChamarNovamente').value = c.chamarNovamente||'Talvez';
+    $('fForca').value = c.forca||'Média';
+    $('fUsoCelular').value = c.usoCelular||'Não usa';
+    $('fHabilidades').value = c.habilidades||'';
+    $('fAutonomia').value = c.autonomia||'Autônoma';
+    $('fProativa').value = c.proativa||'Regular';
+    $('fArruma').value = c.arruma||'Sempre';
+    $('fTemProblema').checked = !!c.temProblema;
+    $('fProblemaDesc').value = c.problemaDesc||'';
+    $('docRg').checked = !!c.docRg;
+    $('docEndereco').checked = !!c.docEndereco;
+    $('docCurso').checked = !!c.docCurso;
+    $('docReferencias').checked = !!c.docReferencias;
+    $('docAntecedentes').checked = !!c.docAntecedentes;
+    $('fValor').value = c.valor||'';
+    $('fUnidade').value = c.unidade||'plantão de 12h';
+    $('fFaltas').value = c.faltas||0;
+    $('fPontualidade').value = c.pontualidade||'Pontual';
+    $('fObs').value = c.obs||'';
+    $('btnDelete').style.display = 'inline-block';
+  }
+  $('overlay').classList.add('open');
+  $('fNome').focus();
+}
+
+function closeModal(){
+  $('overlay').classList.remove('open');
+}
+
+async function handleSubmit(e){
+  e.preventDefault();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+
+  const data = {
+    id: editingId || ('c_' + Date.now()),
+    nome: $('fNome').value.trim(),
+    telefone: $('fTelefone').value.trim(),
+    moradia: $('fMoradia').value,
+    bairro: $('fBairro').value.trim(),
+    nota: Number($('fNota').value) || 3,
+    chamarNovamente: $('fChamarNovamente').value,
+    forca: $('fForca').value,
+    usoCelular: $('fUsoCelular').value,
+    habilidades: $('fHabilidades').value.trim(),
+    autonomia: $('fAutonomia').value,
+    proativa: $('fProativa').value,
+    arruma: $('fArruma').value,
+    temProblema: $('fTemProblema').checked,
+    problemaDesc: $('fProblemaDesc').value.trim(),
+    docRg: $('docRg').checked,
+    docEndereco: $('docEndereco').checked,
+    docCurso: $('docCurso').checked,
+    docReferencias: $('docReferencias').checked,
+    docAntecedentes: $('docAntecedentes').checked,
+    valor: $('fValor').value,
+    unidade: $('fUnidade').value,
+    faltas: $('fFaltas').value,
+    pontualidade: $('fPontualidade').value,
+    obs: $('fObs').value.trim()
+  };
+  if(!data.nome){ showToast('Dê um nome para o cuidador.', true); return; }
+
+  const saveBtn = document.querySelector('#form .btn-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Salvando…';
+
+  if(editingId){
+    const idx = caregivers.findIndex(x=>x.id===editingId);
+    if(idx>-1) caregivers[idx] = data;
+  }else{
+    caregivers.push(data);
+  }
+  await saveData();
+
+  saveBtn.textContent = 'Salvo ✓';
+  setTimeout(()=>{
+    closeModal();
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+    showToast('Cadastro salvo.');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Salvar';
+  }, 300);
+}
+
+async function handleDelete(){
+  if(!editingId) return;
+  if(!confirm('Remover este cuidador do caderno?')) return;
+  caregivers = caregivers.filter(c=>c.id!==editingId);
+  await saveData();
+  closeModal();
+  render();
+  showToast('Cuidador removido.');
+}
+
+$('btnNew').onclick = ()=> openModal(null);
+$('modalClose').onclick = closeModal;
+$('btnCancel').onclick = closeModal;
+$('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
+$('form').onsubmit = handleSubmit;
+$('btnDelete').onclick = handleDelete;
+$('sortSel').onchange = (e)=>{ sortMode = e.target.value; render(); };
+
+$('fNotaStars').addEventListener('click', (e)=>{
+  const star = e.target.closest('.star');
+  if(!star) return;
+  setFormStars(Number(star.dataset.star));
+});
+
+function exportBackup(){
+  try{
+    const blob = new Blob([JSON.stringify(caregivers, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `cuidadores-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('Backup baixado.');
+  }catch(e){
+    showToast('Não foi possível gerar o backup.', true);
+  }
+}
+
+function importBackup(file){
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(!Array.isArray(parsed)) throw new Error('formato inválido');
+      caregivers = parsed;
+      await saveData();
+      render();
+      showToast('Backup importado com sucesso.');
+    }catch(e){
+      showToast('Este arquivo não parece ser um backup válido.', true);
+    }
+  };
+  reader.onerror = ()=> showToast('Erro ao ler o arquivo.', true);
+  reader.readAsText(file);
+}
+
+$('btnExport').onclick = exportBackup;
+$('btnImport').onclick = ()=> $('fileImport').click();
+$('fileImport').onchange = (e)=>{
+  if(e.target.files && e.target.files[0]) importBackup(e.target.files[0]);
+  e.target.value = '';
+};
+
+loadData();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

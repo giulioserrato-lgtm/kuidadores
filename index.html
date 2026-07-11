@@ -271,6 +271,97 @@
   }
   .empty span{display:block; font-family:'Inter',sans-serif; font-size:13px; margin-top:8px;}
 
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:22px;
+    border-bottom:1px solid var(--border);
+  }
+  .tab-btn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    background:none;
+    border:none;
+    padding:10px 4px 12px;
+    margin-right:14px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  .tab-btn.active{
+    color:var(--green-deep);
+    border-bottom-color:var(--green-deep);
+  }
+  .shifts-toolbar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:16px;
+  }
+
+  /* ---------- Shift cards ---------- */
+  .shift-card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:18px 18px 14px;
+    cursor:pointer;
+    transition:box-shadow .15s ease, transform .15s ease;
+  }
+  .shift-card:hover{
+    box-shadow:0 6px 18px rgba(47,93,36,.12);
+    transform:translateY(-2px);
+  }
+  .shift-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .shift-date{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    margin:0;
+  }
+  .shift-by{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .status-icon{
+    font-size:22px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .status-icon.ok{ filter: saturate(1); }
+  .shift-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:14px 0 12px;
+  }
+  .badge{
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    background:var(--sage);
+    color:var(--sage-ink);
+    font-weight:600;
+  }
+  .badge.warn{background:#F2E0C6; color:#7A4F16;}
+  .badge.bad{background:#F2D8D2; color:var(--brick);}
+  .shift-desc{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-top:1px dashed var(--border);
+    padding-top:10px;
+    margin-top:4px;
+  }
+
   /* ---------- Modal ---------- */
   .overlay{
     position:fixed; inset:0;
@@ -419,6 +510,11 @@
 
   <div id="loadingBox" class="loading-msg">Carregando o caderno…</div>
 
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="cuidadores" type="button">Cuidadores</button>
+    <button class="tab-btn" data-tab="plantoes" type="button">Plantões</button>
+  </div>
+
   <div id="content" style="display:none;">
     <div class="stats" id="statsBar"></div>
 
@@ -434,6 +530,13 @@
     </div>
 
     <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="viewPlantoes" style="display:none;">
+    <div class="shifts-toolbar">
+      <button class="btn-new" id="btnNewShift" type="button" style="display:none;">+ Novo registro de plantão</button>
+    </div>
+    <div class="grid" id="shiftsGrid"></div>
   </div>
 </div>
 
@@ -629,6 +732,105 @@
   </div>
 </div>
 
+<div class="overlay" id="overlayShift">
+  <div class="modal">
+    <button class="modal-close" id="modalShiftClose" aria-label="Fechar">✕</button>
+    <h2 id="modalShiftTitle">Novo registro de plantão</h2>
+    <p class="modal-sub">Anote como foi o plantão — leva menos de 1 minuto.</p>
+    <form id="formShift">
+      <input type="hidden" id="sId">
+
+      <fieldset>
+        <legend>Quando e quem</legend>
+        <div class="row">
+          <div>
+            <label for="sData">Data do plantão</label>
+            <input type="date" id="sData" required>
+          </div>
+          <div>
+            <label for="sCuidador">Feito por quem</label>
+            <input type="text" id="sCuidador" list="cuidadoresList" placeholder="Nome do cuidador" required>
+            <datalist id="cuidadoresList"></datalist>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Intercorrências</legend>
+        <div class="switchrow">
+          <input type="checkbox" id="sIntercorrencia">
+          <label for="sIntercorrencia" style="margin:0;">Houve alguma intercorrência neste plantão</label>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="sIntercorrenciaDesc">Se sim, descreva o que aconteceu</label>
+            <textarea id="sIntercorrenciaDesc" placeholder="Ex: queda, falta de ar, mal-estar..."></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sinais e cuidados do dia</legend>
+        <div class="row three">
+          <div>
+            <label for="sFebre">Febre</label>
+            <select id="sFebre">
+              <option value="Não">Não</option>
+              <option value="Sim">Sim</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+          <div>
+            <label for="sXixi">Xixi</label>
+            <select id="sXixi">
+              <option value="Normal">Normal</option>
+              <option value="Pouco">Pouco</option>
+              <option value="Não fez">Não fez</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+          <div>
+            <label for="sCoco">Cocô</label>
+            <select id="sCoco">
+              <option value="Normal">Normal</option>
+              <option value="Não fez">Não fez</option>
+              <option value="Diarreia">Diarreia</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="sAlimentacao">Alimentou-se</label>
+            <select id="sAlimentacao">
+              <option value="Comeu bem">Comeu bem</option>
+              <option value="Comeu pouco">Comeu pouco</option>
+              <option value="Recusou">Recusou</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Observações do plantão</legend>
+        <div class="row single">
+          <div>
+            <textarea id="sObs" placeholder="Qualquer outra observação do plantão"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" id="btnDeleteShift" style="display:none;">Remover registro</button>
+        <div style="display:flex; gap:10px; margin-left:auto;">
+          <button type="button" class="btn-ghost" id="btnCancelShift">Cancelar</button>
+          <button type="submit" class="btn-save">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -658,6 +860,9 @@ let suppressNextSnapshot = false; // evita re-render duplo logo após nosso pró
 let activeFilter = 'Todos';
 let sortMode = 'nome';
 let editingId = null;
+
+let shifts = [];
+let editingShiftId = null;
 
 const $ = (id) => document.getElementById(id);
 
@@ -692,7 +897,7 @@ function storageAvailable(){
 let STORAGE_OK = true;
 
 function cacheLocally(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(caregivers)); }catch(e){ /* ignora, é só cache */ }
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ caregivers, shifts })); }catch(e){ /* ignora, é só cache */ }
 }
 
 async function loadData(){
@@ -701,9 +906,18 @@ async function loadData(){
   // 1) Mostra algo rápido a partir do cache local (offline-first), enquanto a nuvem carrega.
   try{
     const raw = STORAGE_OK ? localStorage.getItem(STORAGE_KEY) : null;
-    caregivers = raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : null;
+    if(Array.isArray(parsed)){
+      // formato antigo do cache (só cuidadores, sem plantões)
+      caregivers = parsed;
+      shifts = [];
+    }else{
+      caregivers = (parsed && Array.isArray(parsed.caregivers)) ? parsed.caregivers : [];
+      shifts = (parsed && Array.isArray(parsed.shifts)) ? parsed.shifts : [];
+    }
   }catch(e){
     caregivers = [];
+    shifts = [];
   }
   $('loadingBox').style.display = 'none';
   $('content').style.display = 'block';
@@ -718,8 +932,10 @@ async function loadData(){
     if(snap.exists()){
       const data = snap.data();
       caregivers = Array.isArray(data.caregivers) ? data.caregivers : [];
+      shifts = Array.isArray(data.shifts) ? data.shifts : [];
     } else {
       caregivers = [];
+      shifts = [];
     }
     cacheLocally();
     render();
@@ -737,7 +953,7 @@ async function saveData(){
 
   try{
     suppressNextSnapshot = true; // já atualizamos a tela localmente, não precisa re-renderizar de novo
-    await setDoc(sharedDocRef, { caregivers, atualizadoEm: new Date().toISOString() });
+    await setDoc(sharedDocRef, { caregivers, shifts, atualizadoEm: new Date().toISOString() });
     CLOUD_OK = true;
     $('storageBanner').classList.remove('show');
     return true;
@@ -871,10 +1087,64 @@ function renderGrid(){
   });
 }
 
+function fmtDataBR(iso){
+  if(!iso) return 'sem data';
+  const [y,m,d] = iso.split('-');
+  return (d && m && y) ? `${d}/${m}/${y}` : iso;
+}
+
+function renderShifts(){
+  // datalist com os nomes já cadastrados, pra facilitar preencher "feito por quem"
+  $('cuidadoresList').innerHTML = caregivers.map(c=>`<option value="${(c.nome||'').replace(/"/g,'&quot;')}">`).join('');
+
+  const list = [...shifts].sort((a,b)=> (b.data||'').localeCompare(a.data||''));
+
+  if(list.length===0){
+    $('shiftsGrid').innerHTML = `<div class="empty" style="grid-column:1/-1;">Nenhum plantão registrado ainda.<span>Toque em “+ Novo registro de plantão” para começar.</span></div>`;
+    return;
+  }
+
+  $('shiftsGrid').innerHTML = list.map(s=>{
+    const houve = !!s.intercorrencia;
+    const icon = houve ? '⚠️' : '✅';
+    const badges = [];
+    if(s.febre==='Sim') badges.push(`<span class="badge bad">Febre</span>`);
+    else badges.push(`<span class="badge">Sem febre</span>`);
+    if(s.xixi==='Não fez') badges.push(`<span class="badge warn">Xixi: não fez</span>`);
+    else if(s.xixi==='Pouco') badges.push(`<span class="badge warn">Xixi: pouco</span>`);
+    else badges.push(`<span class="badge">Xixi: ${s.xixi||'—'}</span>`);
+    if(s.coco==='Não fez') badges.push(`<span class="badge warn">Cocô: não fez</span>`);
+    else if(s.coco==='Diarreia') badges.push(`<span class="badge bad">Cocô: diarreia</span>`);
+    else badges.push(`<span class="badge">Cocô: ${s.coco||'—'}</span>`);
+    if(s.alimentacao==='Recusou') badges.push(`<span class="badge bad">Recusou comida</span>`);
+    else if(s.alimentacao==='Comeu pouco') badges.push(`<span class="badge warn">Comeu pouco</span>`);
+    else badges.push(`<span class="badge">Comeu bem</span>`);
+
+    return `
+    <div class="shift-card" data-id="${s.id}">
+      <div class="shift-top">
+        <div>
+          <p class="shift-date">${fmtDataBR(s.data)}</p>
+          <p class="shift-by">Plantão de ${s.cuidador||'não informado'}</p>
+        </div>
+        <span class="status-icon ${houve?'':'ok'}" title="${houve?'Houve intercorrência':'Sem intercorrência'}">${icon}</span>
+      </div>
+      <div class="shift-badges">${badges.join('')}</div>
+      ${houve && s.intercorrenciaDesc ? `<div class="shift-desc"><strong>Intercorrência:</strong> ${s.intercorrenciaDesc}</div>` : ''}
+      ${s.obs ? `<div class="shift-desc">${s.obs}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.shift-card').forEach(card=>{
+    card.addEventListener('click', ()=> openShiftModal(card.dataset.id));
+  });
+}
+
 function render(){
   renderStats();
   renderChips();
   renderGrid();
+  renderShifts();
 }
 
 function resetForm(){
@@ -995,6 +1265,106 @@ async function handleDelete(){
   showToast('Cuidador removido.');
 }
 
+function resetShiftForm(){
+  $('formShift').reset();
+  $('sId').value = '';
+  $('sFebre').value = 'Não';
+  $('sXixi').value = 'Normal';
+  $('sCoco').value = 'Normal';
+  $('sAlimentacao').value = 'Comeu bem';
+  editingShiftId = null;
+  $('btnDeleteShift').style.display = 'none';
+  $('modalShiftTitle').textContent = 'Novo registro de plantão';
+}
+
+function openShiftModal(id){
+  resetShiftForm();
+  if(id){
+    const s = shifts.find(x=>x.id===id);
+    if(!s) return;
+    editingShiftId = id;
+    $('modalShiftTitle').textContent = `Plantão de ${fmtDataBR(s.data)}`;
+    $('sId').value = s.id;
+    $('sData').value = s.data||'';
+    $('sCuidador').value = s.cuidador||'';
+    $('sIntercorrencia').checked = !!s.intercorrencia;
+    $('sIntercorrenciaDesc').value = s.intercorrenciaDesc||'';
+    $('sFebre').value = s.febre||'Não';
+    $('sXixi').value = s.xixi||'Normal';
+    $('sCoco').value = s.coco||'Normal';
+    $('sAlimentacao').value = s.alimentacao||'Comeu bem';
+    $('sObs').value = s.obs||'';
+    $('btnDeleteShift').style.display = 'inline-block';
+  }else{
+    $('sData').value = new Date().toISOString().slice(0,10);
+  }
+  $('overlayShift').classList.add('open');
+  $('sData').focus();
+}
+
+function closeShiftModal(){
+  $('overlayShift').classList.remove('open');
+}
+
+async function handleShiftSubmit(e){
+  e.preventDefault();
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+
+  const data = {
+    id: editingShiftId || ('p_' + Date.now()),
+    data: $('sData').value,
+    cuidador: $('sCuidador').value.trim(),
+    intercorrencia: $('sIntercorrencia').checked,
+    intercorrenciaDesc: $('sIntercorrenciaDesc').value.trim(),
+    febre: $('sFebre').value,
+    xixi: $('sXixi').value,
+    coco: $('sCoco').value,
+    alimentacao: $('sAlimentacao').value,
+    obs: $('sObs').value.trim()
+  };
+  if(!data.data){ showToast('Escolha a data do plantão.', true); return; }
+  if(!data.cuidador){ showToast('Diga quem fez o plantão.', true); return; }
+
+  const saveBtn = document.querySelector('#formShift .btn-save');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Salvando…';
+
+  if(editingShiftId){
+    const idx = shifts.findIndex(x=>x.id===editingShiftId);
+    if(idx>-1) shifts[idx] = data;
+  }else{
+    shifts.push(data);
+  }
+  await saveData();
+
+  saveBtn.textContent = 'Salvo ✓';
+  setTimeout(()=>{
+    closeShiftModal();
+    render();
+    showToast('Plantão registrado.');
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Salvar';
+  }, 300);
+}
+
+async function handleShiftDelete(){
+  if(!editingShiftId) return;
+  if(!confirm('Remover este registro de plantão?')) return;
+  shifts = shifts.filter(s=>s.id!==editingShiftId);
+  await saveData();
+  closeShiftModal();
+  render();
+  showToast('Registro removido.');
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.tab===tab));
+  $('content').style.display = tab==='cuidadores' ? 'block' : 'none';
+  $('viewPlantoes').style.display = tab==='plantoes' ? 'block' : 'none';
+  $('btnNew').style.display = tab==='cuidadores' ? 'inline-block' : 'none';
+  $('btnNewShift').style.display = tab==='plantoes' ? 'inline-block' : 'none';
+}
+
 $('btnNew').onclick = ()=> openModal(null);
 $('modalClose').onclick = closeModal;
 $('btnCancel').onclick = closeModal;
@@ -1002,6 +1372,17 @@ $('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 $('form').onsubmit = handleSubmit;
 $('btnDelete').onclick = handleDelete;
 $('sortSel').onchange = (e)=>{ sortMode = e.target.value; render(); };
+
+$('btnNewShift').onclick = ()=> openShiftModal(null);
+$('modalShiftClose').onclick = closeShiftModal;
+$('btnCancelShift').onclick = closeShiftModal;
+$('overlayShift').onclick = (e)=>{ if(e.target.id==='overlayShift') closeShiftModal(); };
+$('formShift').onsubmit = handleShiftSubmit;
+$('btnDeleteShift').onclick = handleShiftDelete;
+
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.onclick = ()=> switchTab(b.dataset.tab);
+});
 
 $('fNotaStars').addEventListener('click', (e)=>{
   const star = e.target.closest('.star');
@@ -1011,7 +1392,7 @@ $('fNotaStars').addEventListener('click', (e)=>{
 
 function exportBackup(){
   try{
-    const blob = new Blob([JSON.stringify(caregivers, null, 2)], {type:'application/json'});
+    const blob = new Blob([JSON.stringify({ caregivers, shifts }, null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     const stamp = new Date().toISOString().slice(0,10);
@@ -1032,8 +1413,15 @@ function importBackup(file){
   reader.onload = async (ev)=>{
     try{
       const parsed = JSON.parse(ev.target.result);
-      if(!Array.isArray(parsed)) throw new Error('formato inválido');
-      caregivers = parsed;
+      if(Array.isArray(parsed)){
+        // backup antigo (só cuidadores)
+        caregivers = parsed;
+      }else if(parsed && typeof parsed === 'object'){
+        caregivers = Array.isArray(parsed.caregivers) ? parsed.caregivers : [];
+        shifts = Array.isArray(parsed.shifts) ? parsed.shifts : [];
+      }else{
+        throw new Error('formato inválido');
+      }
       await saveData();
       render();
       showToast('Backup importado com sucesso.');

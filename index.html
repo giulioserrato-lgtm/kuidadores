@@ -414,7 +414,7 @@
   </header>
 
   <div class="storage-banner" id="storageBanner">
-    ⚠️ Este navegador está bloqueando o salvamento permanente (pode ser uma aba anônima/privada). Os dados vão funcionar só durante esta sessão — use "Exportar backup" antes de fechar o app para não perder nada.
+    ⚠️ Sem conexão com a nuvem no momento. O que você fizer agora fica salvo só neste aparelho — assim que a internet voltar, o app volta a sincronizar sozinho. Use "Exportar backup" para garantir uma cópia.
   </div>
 
   <div id="loadingBox" class="loading-msg">Carregando o caderno…</div>
@@ -631,9 +631,30 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, onSnapshot, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// TODO: se algum dia trocar de projeto Firebase, atualize só este bloco.
+const firebaseConfig = {
+  apiKey: "AIzaSyD71BgHjU9aJ4RqUdfqVOmK01w7J3kwGFM",
+  authDomain: "caderno-cuidadores.firebaseapp.com",
+  projectId: "caderno-cuidadores",
+  storageBucket: "caderno-cuidadores.firebasestorage.app",
+  messagingSenderId: "110177169647",
+  appId: "1:110177169647:web:8383c2fd926835825e6b1a"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+// Todo mundo que abre o link lê/escreve neste MESMO documento compartilhado.
+const sharedDocRef = doc(db, "caderno", "cuidadores");
+
 const STORAGE_KEY = 'cuidadores-lista';
 let caregivers = [];
+let CLOUD_OK = true;
+let suppressNextSnapshot = false; // evita re-render duplo logo após nosso próprio save
 let activeFilter = 'Todos';
 let sortMode = 'nome';
 let editingId = null;
@@ -670,13 +691,16 @@ function storageAvailable(){
 }
 let STORAGE_OK = true;
 
+function cacheLocally(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(caregivers)); }catch(e){ /* ignora, é só cache */ }
+}
+
 async function loadData(){
   STORAGE_OK = storageAvailable();
-  if(!STORAGE_OK){
-    $('storageBanner').classList.add('show');
-  }
+
+  // 1) Mostra algo rápido a partir do cache local (offline-first), enquanto a nuvem carrega.
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = STORAGE_OK ? localStorage.getItem(STORAGE_KEY) : null;
     caregivers = raw ? JSON.parse(raw) : [];
   }catch(e){
     caregivers = [];
@@ -684,19 +708,45 @@ async function loadData(){
   $('loadingBox').style.display = 'none';
   $('content').style.display = 'block';
   render();
+
+  // 2) Liga a escuta em tempo real do Firestore. Sempre que QUALQUER pessoa
+  //    com o link salvar algo, todo mundo recebe a atualização aqui.
+  onSnapshot(sharedDocRef, (snap)=>{
+    CLOUD_OK = true;
+    $('storageBanner').classList.remove('show');
+    if(suppressNextSnapshot){ suppressNextSnapshot = false; return; }
+    if(snap.exists()){
+      const data = snap.data();
+      caregivers = Array.isArray(data.caregivers) ? data.caregivers : [];
+    } else {
+      caregivers = [];
+    }
+    cacheLocally();
+    render();
+  }, (err)=>{
+    console.error('Firestore onSnapshot error:', err);
+    CLOUD_OK = false;
+    $('storageBanner').classList.add('show');
+    showToast('Sem conexão com a nuvem. Mostrando dados salvos neste aparelho.', true);
+  });
 }
 
 async function saveData(){
-  if(!STORAGE_OK){
-    return true;
-  }
+  // Sempre guarda uma cópia local (funciona offline, mesmo sem nuvem).
+  if(STORAGE_OK) cacheLocally();
+
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(caregivers));
+    suppressNextSnapshot = true; // já atualizamos a tela localmente, não precisa re-renderizar de novo
+    await setDoc(sharedDocRef, { caregivers, atualizadoEm: new Date().toISOString() });
+    CLOUD_OK = true;
+    $('storageBanner').classList.remove('show');
     return true;
   }catch(e){
-    STORAGE_OK = false;
+    suppressNextSnapshot = false;
+    console.error('Erro ao salvar no Firestore:', e);
+    CLOUD_OK = false;
     $('storageBanner').classList.add('show');
-    showToast('O navegador bloqueou o salvamento. Use "Exportar backup".', true);
+    showToast('Não foi possível salvar na nuvem agora. Os dados ficaram só neste aparelho — tente novamente com internet.', true);
     return true;
   }
 }

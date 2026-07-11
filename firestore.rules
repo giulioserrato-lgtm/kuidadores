@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Libera leitura/escrita apenas no documento único usado pelo app
+    // (caderno/cuidadores). Como o app não tem login, qualquer pessoa com
+    // o link e a URL do Firebase consegue ler/escrever esse documento —
+    // é o modelo mais simples de "compartilhado por link".
+    // Se quiser exigir senha/login no futuro, me avise que ajusto aqui
+    // junto com o Firebase Authentication.
+    match /caderno/cuidadores {
+      allow read, write: if true;
+    }
+    // Bloqueia tudo o mais por padrão.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

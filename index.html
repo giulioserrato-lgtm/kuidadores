@@ -218,6 +218,33 @@
     align-items:flex-start;
     gap:10px;
   }
+  .card-namerow{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .avatar{
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    flex-shrink:0;
+    background:var(--sage);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    color:var(--sage-ink);
+    overflow:hidden;
+    cursor:zoom-in;
+  }
+  .avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .avatar:hover{ filter:brightness(1.05); }
   .cname{
     font-family:'Fraunces',serif;
     font-weight:600;
@@ -374,6 +401,58 @@
     z-index:50;
   }
   .overlay.open{display:flex;}
+
+  /* ---------- Photo picker (form) ---------- */
+  .photo-picker{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .photo-preview{
+    width:84px;
+    height:84px;
+    border-radius:50%;
+    background:var(--sage);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    overflow:hidden;
+    flex-shrink:0;
+  }
+  .photo-preview img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .photo-actions{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .photo-upload-btn{ display:inline-block; cursor:pointer; }
+
+  /* ---------- Lightbox ---------- */
+  .overlay.lightbox{
+    background:rgba(20,26,15,.88);
+    align-items:center;
+    padding:24px;
+  }
+  .overlay.lightbox img{
+    max-width:min(90vw, 520px);
+    max-height:85vh;
+    border-radius:10px;
+    box-shadow:0 12px 40px rgba(0,0,0,.4);
+  }
+  .overlay.lightbox .modal-close{
+    position:fixed;
+    top:20px;
+    right:24px;
+    background:rgba(255,255,255,.9);
+  }
   .modal{
     background:var(--card);
     border-radius:8px;
@@ -548,6 +627,22 @@
     <form id="form">
       <input type="hidden" id="fId">
       <input type="hidden" id="fNota" value="3">
+      <input type="hidden" id="fFoto" value="">
+
+      <fieldset>
+        <legend>Foto</legend>
+        <div class="photo-picker">
+          <div class="photo-preview" id="fFotoPreview">
+            <span id="fFotoPlaceholder">📷</span>
+            <img id="fFotoImg" style="display:none;" alt="Foto da cuidadora">
+          </div>
+          <div class="photo-actions">
+            <label class="btn-ghost photo-upload-btn" for="fFotoInput">Escolher foto</label>
+            <input type="file" id="fFotoInput" accept="image/*" style="display:none;">
+            <button type="button" class="linklike" id="fFotoRemove" style="display:none;">Remover foto</button>
+          </div>
+        </div>
+      </fieldset>
 
       <fieldset>
         <legend>Identificação</legend>
@@ -831,6 +926,11 @@
   </div>
 </div>
 
+<div class="overlay lightbox" id="overlayLightbox">
+  <button class="modal-close" id="lightboxClose" aria-label="Fechar">✕</button>
+  <img id="lightboxImg" alt="Foto da cuidadora em tamanho maior">
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -1056,9 +1156,14 @@ function renderGrid(){
     return `
     <div class="card" data-id="${c.id}">
       <div class="card-top">
-        <div>
-          <p class="cname">${c.nome||'Sem nome'}</p>
-          <p class="cmeta">${c.telefone||'sem telefone'} · ${c.moradia||'distância não informada'}${c.bairro? ' · '+c.bairro:''}</p>
+        <div class="card-namerow">
+          <div class="avatar" data-id="${c.id}" title="Ver foto em tamanho maior">
+            ${c.foto ? `<img src="${c.foto}" alt="Foto de ${c.nome||'cuidador'}">` : '🧑‍⚕️'}
+          </div>
+          <div>
+            <p class="cname">${c.nome||'Sem nome'}</p>
+            <p class="cmeta">${c.telefone||'sem telefone'} · ${c.moradia||'distância não informada'}${c.bairro? ' · '+c.bairro:''}</p>
+          </div>
         </div>
         ${starsHTML(c.nota, true, c.id)}
       </div>
@@ -1073,7 +1178,17 @@ function renderGrid(){
   document.querySelectorAll('.card').forEach(card=>{
     card.addEventListener('click', (e)=>{
       if(e.target.closest('.stars')) return;
+      if(e.target.closest('.avatar')) return;
       openModal(card.dataset.id);
+    });
+  });
+
+  document.querySelectorAll('.avatar').forEach(av=>{
+    av.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const c = caregivers.find(x=>x.id===av.dataset.id);
+      if(c && c.foto) openLightbox(c.foto);
+      else openModal(av.dataset.id); // sem foto ainda: abre o cadastro pra adicionar uma
     });
   });
 
@@ -1155,6 +1270,7 @@ function resetForm(){
   editingId = null;
   $('btnDelete').style.display = 'none';
   $('modalTitle').textContent = 'Novo cuidador';
+  setFormFoto('');
 }
 
 function openModal(id){
@@ -1189,6 +1305,7 @@ function openModal(id){
     $('fFaltas').value = c.faltas||0;
     $('fPontualidade').value = c.pontualidade||'Pontual';
     $('fObs').value = c.obs||'';
+    setFormFoto(c.foto||'');
     $('btnDelete').style.display = 'inline-block';
   }
   $('overlay').classList.add('open');
@@ -1197,6 +1314,59 @@ function openModal(id){
 
 function closeModal(){
   $('overlay').classList.remove('open');
+}
+
+function setFormFoto(dataUrl){
+  $('fFoto').value = dataUrl || '';
+  if(dataUrl){
+    $('fFotoImg').src = dataUrl;
+    $('fFotoImg').style.display = 'block';
+    $('fFotoPlaceholder').style.display = 'none';
+    $('fFotoRemove').style.display = 'inline-block';
+  }else{
+    $('fFotoImg').src = '';
+    $('fFotoImg').style.display = 'none';
+    $('fFotoPlaceholder').style.display = 'block';
+    $('fFotoRemove').style.display = 'none';
+  }
+}
+
+function resizeImageFile(file, maxSize){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = (ev)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let { width, height } = img;
+        if(width > height && width > maxSize){
+          height = Math.round(height * (maxSize/width));
+          width = maxSize;
+        }else if(height > maxSize){
+          width = Math.round(width * (maxSize/height));
+          height = maxSize;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function openLightbox(src){
+  $('lightboxImg').src = src;
+  $('overlayLightbox').classList.add('open');
+}
+
+function closeLightbox(){
+  $('overlayLightbox').classList.remove('open');
+  $('lightboxImg').src = '';
 }
 
 async function handleSubmit(e){
@@ -1210,6 +1380,7 @@ async function handleSubmit(e){
     moradia: $('fMoradia').value,
     bairro: $('fBairro').value.trim(),
     nota: Number($('fNota').value) || 3,
+    foto: $('fFoto').value || '',
     chamarNovamente: $('fChamarNovamente').value,
     forca: $('fForca').value,
     usoCelular: $('fUsoCelular').value,
@@ -1372,6 +1543,26 @@ $('overlay').onclick = (e)=>{ if(e.target.id==='overlay') closeModal(); };
 $('form').onsubmit = handleSubmit;
 $('btnDelete').onclick = handleDelete;
 $('sortSel').onchange = (e)=>{ sortMode = e.target.value; render(); };
+
+$('fFotoInput').onchange = async (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    showToast('Escolha um arquivo de imagem.', true);
+    return;
+  }
+  try{
+    const dataUrl = await resizeImageFile(file, 500);
+    setFormFoto(dataUrl);
+  }catch(err){
+    showToast('Não foi possível carregar essa foto.', true);
+  }
+  e.target.value = '';
+};
+$('fFotoRemove').onclick = ()=> setFormFoto('');
+
+$('lightboxClose').onclick = closeLightbox;
+$('overlayLightbox').onclick = (e)=>{ if(e.target.id==='overlayLightbox') closeLightbox(); };
 
 $('btnNewShift').onclick = ()=> openShiftModal(null);
 $('modalShiftClose').onclick = closeShiftModal;

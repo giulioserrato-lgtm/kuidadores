@@ -836,7 +836,7 @@
       <input type="hidden" id="sId">
 
       <fieldset>
-        <legend>Quando e quem</legend>
+        <legend>Quando, quem e paciente</legend>
         <div class="row">
           <div>
             <label for="sData">Data do plantão</label>
@@ -846,6 +846,15 @@
             <label for="sCuidador">Feito por quem</label>
             <input type="text" id="sCuidador" list="cuidadoresList" placeholder="Nome do cuidador" required>
             <datalist id="cuidadoresList"></datalist>
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="sPaciente">Paciente</label>
+            <select id="sPaciente" required>
+              <option value="José">José</option>
+              <option value="Cirene">Cirene</option>
+            </select>
           </div>
         </div>
       </fieldset>
@@ -1239,7 +1248,7 @@ function renderShifts(){
     <div class="shift-card" data-id="${s.id}">
       <div class="shift-top">
         <div>
-          <p class="shift-date">${fmtDataBR(s.data)}</p>
+          <p class="shift-date">${fmtDataBR(s.data)} · ${s.paciente||'paciente não informado'}</p>
           <p class="shift-by">Plantão de ${s.cuidador||'não informado'}</p>
         </div>
         <span class="status-icon ${houve?'':'ok'}" title="${houve?'Houve intercorrência':'Sem intercorrência'}">${icon}</span>
@@ -1443,6 +1452,7 @@ function resetShiftForm(){
   $('sXixi').value = 'Normal';
   $('sCoco').value = 'Normal';
   $('sAlimentacao').value = 'Comeu bem';
+  $('sPaciente').value = 'José';
   editingShiftId = null;
   $('btnDeleteShift').style.display = 'none';
   $('modalShiftTitle').textContent = 'Novo registro de plantão';
@@ -1458,6 +1468,7 @@ function openShiftModal(id){
     $('sId').value = s.id;
     $('sData').value = s.data||'';
     $('sCuidador').value = s.cuidador||'';
+    $('sPaciente').value = s.paciente||'José';
     $('sIntercorrencia').checked = !!s.intercorrencia;
     $('sIntercorrenciaDesc').value = s.intercorrenciaDesc||'';
     $('sFebre').value = s.febre||'Não';
@@ -1485,6 +1496,7 @@ async function handleShiftSubmit(e){
     id: editingShiftId || ('p_' + Date.now()),
     data: $('sData').value,
     cuidador: $('sCuidador').value.trim(),
+    paciente: $('sPaciente').value,
     intercorrencia: $('sIntercorrencia').checked,
     intercorrenciaDesc: $('sIntercorrenciaDesc').value.trim(),
     febre: $('sFebre').value,

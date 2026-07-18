@@ -515,6 +515,7 @@
   .checkitem input{width:auto;}
   .switchrow{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
   .switchrow label{margin:0;}
+  .field-hint{font-size:11.5px; color:var(--ink-soft); margin:8px 0 0;}
   .modal-actions{
     display:flex;
     justify-content:space-between;
@@ -670,6 +671,21 @@
             <input type="text" id="fBairro" placeholder="Ex: 20 min de ônibus">
           </div>
         </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vínculo</legend>
+        <div class="checkgrid">
+          <label class="checkitem">
+            <input type="checkbox" id="fVinculoEmpresa">
+            Empresa
+          </label>
+          <label class="checkitem">
+            <input type="checkbox" id="fVinculoParticular">
+            Particular
+          </label>
+        </div>
+        <p class="field-hint">Marque as duas se a cuidadora atender tanto pela empresa quanto por conta própria.</p>
       </fieldset>
 
       <fieldset>
@@ -832,7 +848,7 @@
     <button class="modal-close" id="modalShiftClose" aria-label="Fechar">✕</button>
     <h2 id="modalShiftTitle">Novo registro de plantão</h2>
     <p class="modal-sub">Anote como foi o plantão — leva menos de 1 minuto.</p>
-    <form id="formShift">
+    <form id="formShift" autocomplete="off">
       <input type="hidden" id="sId">
 
       <fieldset>
@@ -844,7 +860,7 @@
           </div>
           <div>
             <label for="sCuidador">Feito por quem</label>
-            <input type="text" id="sCuidador" list="cuidadoresList" placeholder="Nome do cuidador" required>
+            <input type="text" id="sCuidador" list="cuidadoresList" placeholder="Nome do cuidador" required autocomplete="off">
             <datalist id="cuidadoresList"></datalist>
           </div>
         </div>
@@ -1146,6 +1162,9 @@ function renderGrid(){
 
   $('grid').innerHTML = list.map(c=>{
     const tags = [];
+    if(c.vinculoEmpresa && c.vinculoParticular) tags.push(`<span class="tag">Empresa + Particular</span>`);
+    else if(c.vinculoEmpresa) tags.push(`<span class="tag">Empresa</span>`);
+    else if(c.vinculoParticular) tags.push(`<span class="tag">Particular</span>`);
     tags.push(`<span class="tag">Força: ${c.forca||'—'}</span>`);
     tags.push(`<span class="tag">${c.autonomia||'—'}</span>`);
     tags.push(`<span class="tag">${c.proativa||'—'}</span>`);
@@ -1276,6 +1295,8 @@ function resetForm(){
   $('fId').value = '';
   setFormStars(3);
   $('fChamarNovamente').value = 'Talvez';
+  $('fVinculoEmpresa').checked = false;
+  $('fVinculoParticular').checked = false;
   editingId = null;
   $('btnDelete').style.display = 'none';
   $('modalTitle').textContent = 'Novo cuidador';
@@ -1315,6 +1336,8 @@ function openModal(id){
     $('fPontualidade').value = c.pontualidade||'Pontual';
     $('fObs').value = c.obs||'';
     setFormFoto(c.foto||'');
+    $('fVinculoEmpresa').checked = !!c.vinculoEmpresa;
+    $('fVinculoParticular').checked = !!c.vinculoParticular;
     $('btnDelete').style.display = 'inline-block';
   }
   $('overlay').classList.add('open');
@@ -1390,6 +1413,8 @@ async function handleSubmit(e){
     bairro: $('fBairro').value.trim(),
     nota: Number($('fNota').value) || 3,
     foto: $('fFoto').value || '',
+    vinculoEmpresa: $('fVinculoEmpresa').checked,
+    vinculoParticular: $('fVinculoParticular').checked,
     chamarNovamente: $('fChamarNovamente').value,
     forca: $('fForca').value,
     usoCelular: $('fUsoCelular').value,
@@ -1448,6 +1473,9 @@ async function handleDelete(){
 function resetShiftForm(){
   $('formShift').reset();
   $('sId').value = '';
+  $('sIntercorrencia').checked = false;
+  $('sIntercorrenciaDesc').value = '';
+  $('sObs').value = '';
   $('sFebre').value = 'Não';
   $('sXixi').value = 'Normal';
   $('sCoco').value = 'Normal';

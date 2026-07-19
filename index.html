@@ -388,6 +388,34 @@
     padding-top:10px;
     margin-top:4px;
   }
+  .patient-cols{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin:14px 0 6px;
+  }
+  .patient-col{
+    background:rgba(122,167,99,.07);
+    border-radius:6px;
+    padding:10px 12px;
+  }
+  .patient-col-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+    font-family:'Fraunces',serif;
+    font-size:14.5px;
+  }
+  .patient-col .status-icon{ font-size:17px; }
+  .patient-col .shift-desc{
+    border-top:none;
+    padding-top:6px;
+    margin-top:6px;
+  }
+  @media (max-width:520px){
+    .patient-cols{ grid-template-columns:1fr; }
+  }
 
   /* ---------- Modal ---------- */
   .overlay{
@@ -516,6 +544,14 @@
   .switchrow{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
   .switchrow label{margin:0;}
   .field-hint{font-size:11.5px; color:var(--ink-soft); margin:8px 0 0;}
+  .patient-fieldset{
+    background:rgba(122,167,99,.07);
+    border-radius:6px;
+  }
+  .patient-fieldset legend{
+    color:var(--green-deep);
+    font-size:15px;
+  }
   .modal-actions{
     display:flex;
     justify-content:space-between;
@@ -847,12 +883,12 @@
   <div class="modal">
     <button class="modal-close" id="modalShiftClose" aria-label="Fechar">✕</button>
     <h2 id="modalShiftTitle">Novo registro de plantão</h2>
-    <p class="modal-sub">Anote como foi o plantão — leva menos de 1 minuto.</p>
+    <p class="modal-sub">Um registro por dia, com José e Cirene juntos — leva menos de 1 minuto.</p>
     <form id="formShift" autocomplete="off">
       <input type="hidden" id="sId">
 
       <fieldset>
-        <legend>Quando, quem e paciente</legend>
+        <legend>Quando e quem</legend>
         <div class="row">
           <div>
             <label for="sData">Data do plantão</label>
@@ -864,45 +900,31 @@
             <datalist id="cuidadoresList"></datalist>
           </div>
         </div>
-        <div class="row single">
-          <div>
-            <label for="sPaciente">Paciente</label>
-            <select id="sPaciente" required>
-              <option value="José">José</option>
-              <option value="Cirene">Cirene</option>
-            </select>
-          </div>
-        </div>
       </fieldset>
 
-      <fieldset>
-        <legend>Intercorrências</legend>
+      <fieldset class="patient-fieldset">
+        <legend>José</legend>
         <div class="switchrow">
-          <input type="checkbox" id="sIntercorrencia">
-          <label for="sIntercorrencia" style="margin:0;">Houve alguma intercorrência neste plantão</label>
+          <input type="checkbox" id="sJoseIntercorrencia">
+          <label for="sJoseIntercorrencia" style="margin:0;">Houve intercorrência com José</label>
         </div>
         <div class="row single">
           <div>
-            <label for="sIntercorrenciaDesc">Se sim, descreva o que aconteceu</label>
-            <textarea id="sIntercorrenciaDesc" placeholder="Ex: queda, falta de ar, mal-estar..."></textarea>
+            <textarea id="sJoseIntercorrenciaDesc" placeholder="Se sim, descreva o que aconteceu"></textarea>
           </div>
         </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Sinais e cuidados do dia</legend>
         <div class="row three">
           <div>
-            <label for="sFebre">Febre</label>
-            <select id="sFebre">
+            <label for="sJoseFebre">Febre</label>
+            <select id="sJoseFebre">
               <option value="Não">Não</option>
               <option value="Sim">Sim</option>
               <option value="Não observado">Não observado</option>
             </select>
           </div>
           <div>
-            <label for="sXixi">Xixi</label>
-            <select id="sXixi">
+            <label for="sJoseXixi">Xixi</label>
+            <select id="sJoseXixi">
               <option value="Normal">Normal</option>
               <option value="Pouco">Pouco</option>
               <option value="Não fez">Não fez</option>
@@ -910,8 +932,8 @@
             </select>
           </div>
           <div>
-            <label for="sCoco">Cocô</label>
-            <select id="sCoco">
+            <label for="sJoseCoco">Cocô</label>
+            <select id="sJoseCoco">
               <option value="Normal">Normal</option>
               <option value="Não fez">Não fez</option>
               <option value="Diarreia">Diarreia</option>
@@ -921,8 +943,59 @@
         </div>
         <div class="row single">
           <div>
-            <label for="sAlimentacao">Alimentou-se</label>
-            <select id="sAlimentacao">
+            <label for="sJoseAlimentacao">Alimentou-se</label>
+            <select id="sJoseAlimentacao">
+              <option value="Comeu bem">Comeu bem</option>
+              <option value="Comeu pouco">Comeu pouco</option>
+              <option value="Recusou">Recusou</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="patient-fieldset">
+        <legend>Cirene</legend>
+        <div class="switchrow">
+          <input type="checkbox" id="sCireneIntercorrencia">
+          <label for="sCireneIntercorrencia" style="margin:0;">Houve intercorrência com Cirene</label>
+        </div>
+        <div class="row single">
+          <div>
+            <textarea id="sCireneIntercorrenciaDesc" placeholder="Se sim, descreva o que aconteceu"></textarea>
+          </div>
+        </div>
+        <div class="row three">
+          <div>
+            <label for="sCireneFebre">Febre</label>
+            <select id="sCireneFebre">
+              <option value="Não">Não</option>
+              <option value="Sim">Sim</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+          <div>
+            <label for="sCireneXixi">Xixi</label>
+            <select id="sCireneXixi">
+              <option value="Normal">Normal</option>
+              <option value="Pouco">Pouco</option>
+              <option value="Não fez">Não fez</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+          <div>
+            <label for="sCireneCoco">Cocô</label>
+            <select id="sCireneCoco">
+              <option value="Normal">Normal</option>
+              <option value="Não fez">Não fez</option>
+              <option value="Diarreia">Diarreia</option>
+              <option value="Não observado">Não observado</option>
+            </select>
+          </div>
+        </div>
+        <div class="row single">
+          <div>
+            <label for="sCireneAlimentacao">Alimentou-se</label>
+            <select id="sCireneAlimentacao">
               <option value="Comeu bem">Comeu bem</option>
               <option value="Comeu pouco">Comeu pouco</option>
               <option value="Recusou">Recusou</option>
@@ -932,10 +1005,10 @@
       </fieldset>
 
       <fieldset>
-        <legend>Observações do plantão</legend>
+        <legend>Observações gerais do plantão</legend>
         <div class="row single">
           <div>
-            <textarea id="sObs" placeholder="Qualquer outra observação do plantão"></textarea>
+            <textarea id="sObs" placeholder="Qualquer outra observação do plantão (não específica de um paciente)"></textarea>
           </div>
         </div>
       </fieldset>
@@ -1025,6 +1098,30 @@ function cacheLocally(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({ caregivers, shifts })); }catch(e){ /* ignora, é só cache */ }
 }
 
+function migrateShifts(){
+  shifts.forEach(s=>{
+    if(!s.jose && !s.cirene && s.paciente){
+      const patientData = {
+        intercorrencia: !!s.intercorrencia,
+        intercorrenciaDesc: s.intercorrenciaDesc||'',
+        febre: s.febre||'Não',
+        xixi: s.xixi||'Normal',
+        coco: s.coco||'Normal',
+        alimentacao: s.alimentacao||'Comeu bem'
+      };
+      if(s.paciente==='Cirene') s.cirene = patientData;
+      else s.jose = patientData;
+      delete s.paciente;
+      delete s.intercorrencia;
+      delete s.intercorrenciaDesc;
+      delete s.febre;
+      delete s.xixi;
+      delete s.coco;
+      delete s.alimentacao;
+    }
+  });
+}
+
 async function loadData(){
   STORAGE_OK = storageAvailable();
 
@@ -1044,6 +1141,7 @@ async function loadData(){
     caregivers = [];
     shifts = [];
   }
+  migrateShifts();
   $('loadingBox').style.display = 'none';
   $('content').style.display = 'block';
   render();
@@ -1062,6 +1160,7 @@ async function loadData(){
       caregivers = [];
       shifts = [];
     }
+    migrateShifts();
     cacheLocally();
     render();
   }, (err)=>{
@@ -1236,6 +1335,38 @@ function fmtDataBR(iso){
   return (d && m && y) ? `${d}/${m}/${y}` : iso;
 }
 
+function patientBadges(p){
+  if(!p) p = {};
+  const badges = [];
+  if(p.febre==='Sim') badges.push(`<span class="badge bad">Febre</span>`);
+  else badges.push(`<span class="badge">Sem febre</span>`);
+  if(p.xixi==='Não fez') badges.push(`<span class="badge warn">Xixi: não fez</span>`);
+  else if(p.xixi==='Pouco') badges.push(`<span class="badge warn">Xixi: pouco</span>`);
+  else badges.push(`<span class="badge">Xixi: ${p.xixi||'—'}</span>`);
+  if(p.coco==='Não fez') badges.push(`<span class="badge warn">Cocô: não fez</span>`);
+  else if(p.coco==='Diarreia') badges.push(`<span class="badge bad">Cocô: diarreia</span>`);
+  else badges.push(`<span class="badge">Cocô: ${p.coco||'—'}</span>`);
+  if(p.alimentacao==='Recusou') badges.push(`<span class="badge bad">Recusou comida</span>`);
+  else if(p.alimentacao==='Comeu pouco') badges.push(`<span class="badge warn">Comeu pouco</span>`);
+  else badges.push(`<span class="badge">Comeu bem</span>`);
+  return badges.join('');
+}
+
+function patientBlock(nome, p){
+  if(!p) p = {};
+  const houve = !!p.intercorrencia;
+  const icon = houve ? '⚠️' : '✅';
+  return `
+    <div class="patient-col">
+      <div class="patient-col-head">
+        <strong>${nome}</strong>
+        <span class="status-icon ${houve?'':'ok'}" title="${houve?'Houve intercorrência':'Sem intercorrência'}">${icon}</span>
+      </div>
+      <div class="shift-badges">${patientBadges(p)}</div>
+      ${houve && p.intercorrenciaDesc ? `<div class="shift-desc"><strong>Intercorrência:</strong> ${p.intercorrenciaDesc}</div>` : ''}
+    </div>`;
+}
+
 function renderShifts(){
   // datalist com os nomes já cadastrados, pra facilitar preencher "feito por quem"
   $('cuidadoresList').innerHTML = caregivers.map(c=>`<option value="${(c.nome||'').replace(/"/g,'&quot;')}">`).join('');
@@ -1248,32 +1379,18 @@ function renderShifts(){
   }
 
   $('shiftsGrid').innerHTML = list.map(s=>{
-    const houve = !!s.intercorrencia;
-    const icon = houve ? '⚠️' : '✅';
-    const badges = [];
-    if(s.febre==='Sim') badges.push(`<span class="badge bad">Febre</span>`);
-    else badges.push(`<span class="badge">Sem febre</span>`);
-    if(s.xixi==='Não fez') badges.push(`<span class="badge warn">Xixi: não fez</span>`);
-    else if(s.xixi==='Pouco') badges.push(`<span class="badge warn">Xixi: pouco</span>`);
-    else badges.push(`<span class="badge">Xixi: ${s.xixi||'—'}</span>`);
-    if(s.coco==='Não fez') badges.push(`<span class="badge warn">Cocô: não fez</span>`);
-    else if(s.coco==='Diarreia') badges.push(`<span class="badge bad">Cocô: diarreia</span>`);
-    else badges.push(`<span class="badge">Cocô: ${s.coco||'—'}</span>`);
-    if(s.alimentacao==='Recusou') badges.push(`<span class="badge bad">Recusou comida</span>`);
-    else if(s.alimentacao==='Comeu pouco') badges.push(`<span class="badge warn">Comeu pouco</span>`);
-    else badges.push(`<span class="badge">Comeu bem</span>`);
-
     return `
     <div class="shift-card" data-id="${s.id}">
       <div class="shift-top">
         <div>
-          <p class="shift-date">${fmtDataBR(s.data)} · ${s.paciente||'paciente não informado'}</p>
+          <p class="shift-date">${fmtDataBR(s.data)}</p>
           <p class="shift-by">Plantão de ${s.cuidador||'não informado'}</p>
         </div>
-        <span class="status-icon ${houve?'':'ok'}" title="${houve?'Houve intercorrência':'Sem intercorrência'}">${icon}</span>
       </div>
-      <div class="shift-badges">${badges.join('')}</div>
-      ${houve && s.intercorrenciaDesc ? `<div class="shift-desc"><strong>Intercorrência:</strong> ${s.intercorrenciaDesc}</div>` : ''}
+      <div class="patient-cols">
+        ${patientBlock('José', s.jose)}
+        ${patientBlock('Cirene', s.cirene)}
+      </div>
       ${s.obs ? `<div class="shift-desc">${s.obs}</div>` : ''}
     </div>`;
   }).join('');
@@ -1473,17 +1590,28 @@ async function handleDelete(){
 function resetShiftForm(){
   $('formShift').reset();
   $('sId').value = '';
-  $('sIntercorrencia').checked = false;
-  $('sIntercorrenciaDesc').value = '';
+  ['Jose','Cirene'].forEach(p=>{
+    $(`s${p}Intercorrencia`).checked = false;
+    $(`s${p}IntercorrenciaDesc`).value = '';
+    $(`s${p}Febre`).value = 'Não';
+    $(`s${p}Xixi`).value = 'Normal';
+    $(`s${p}Coco`).value = 'Normal';
+    $(`s${p}Alimentacao`).value = 'Comeu bem';
+  });
   $('sObs').value = '';
-  $('sFebre').value = 'Não';
-  $('sXixi').value = 'Normal';
-  $('sCoco').value = 'Normal';
-  $('sAlimentacao').value = 'Comeu bem';
-  $('sPaciente').value = 'José';
   editingShiftId = null;
   $('btnDeleteShift').style.display = 'none';
   $('modalShiftTitle').textContent = 'Novo registro de plantão';
+}
+
+function loadPatientIntoForm(prefix, p){
+  if(!p) p = {};
+  $(`s${prefix}Intercorrencia`).checked = !!p.intercorrencia;
+  $(`s${prefix}IntercorrenciaDesc`).value = p.intercorrenciaDesc||'';
+  $(`s${prefix}Febre`).value = p.febre||'Não';
+  $(`s${prefix}Xixi`).value = p.xixi||'Normal';
+  $(`s${prefix}Coco`).value = p.coco||'Normal';
+  $(`s${prefix}Alimentacao`).value = p.alimentacao||'Comeu bem';
 }
 
 function openShiftModal(id){
@@ -1496,13 +1624,8 @@ function openShiftModal(id){
     $('sId').value = s.id;
     $('sData').value = s.data||'';
     $('sCuidador').value = s.cuidador||'';
-    $('sPaciente').value = s.paciente||'José';
-    $('sIntercorrencia').checked = !!s.intercorrencia;
-    $('sIntercorrenciaDesc').value = s.intercorrenciaDesc||'';
-    $('sFebre').value = s.febre||'Não';
-    $('sXixi').value = s.xixi||'Normal';
-    $('sCoco').value = s.coco||'Normal';
-    $('sAlimentacao').value = s.alimentacao||'Comeu bem';
+    loadPatientIntoForm('Jose', s.jose);
+    loadPatientIntoForm('Cirene', s.cirene);
     $('sObs').value = s.obs||'';
     $('btnDeleteShift').style.display = 'inline-block';
   }else{
@@ -1516,6 +1639,17 @@ function closeShiftModal(){
   $('overlayShift').classList.remove('open');
 }
 
+function readPatientFromForm(prefix){
+  return {
+    intercorrencia: $(`s${prefix}Intercorrencia`).checked,
+    intercorrenciaDesc: $(`s${prefix}IntercorrenciaDesc`).value.trim(),
+    febre: $(`s${prefix}Febre`).value,
+    xixi: $(`s${prefix}Xixi`).value,
+    coco: $(`s${prefix}Coco`).value,
+    alimentacao: $(`s${prefix}Alimentacao`).value
+  };
+}
+
 async function handleShiftSubmit(e){
   e.preventDefault();
   if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -1524,13 +1658,8 @@ async function handleShiftSubmit(e){
     id: editingShiftId || ('p_' + Date.now()),
     data: $('sData').value,
     cuidador: $('sCuidador').value.trim(),
-    paciente: $('sPaciente').value,
-    intercorrencia: $('sIntercorrencia').checked,
-    intercorrenciaDesc: $('sIntercorrenciaDesc').value.trim(),
-    febre: $('sFebre').value,
-    xixi: $('sXixi').value,
-    coco: $('sCoco').value,
-    alimentacao: $('sAlimentacao').value,
+    jose: readPatientFromForm('Jose'),
+    cirene: readPatientFromForm('Cirene'),
     obs: $('sObs').value.trim()
   };
   if(!data.data){ showToast('Escolha a data do plantão.', true); return; }
